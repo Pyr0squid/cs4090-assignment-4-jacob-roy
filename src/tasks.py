@@ -123,3 +123,45 @@ def get_overdue_tasks(tasks):
         if not task.get("completed", False) and 
            task.get("due_date", "") < today
     ]
+
+# Test-Driven Development (TDD) Features
+def sort_tasks_by_due_date(tasks):
+    # function returns "due_date" for sort function 
+    def parse_date(task):
+        try:
+            return datetime.strptime(task.get("due_date"), "%Y-%m-%d")
+        except:
+            return datetime.max
+    
+    # Return a sorted list
+    return sorted(tasks, key=parse_date)
+
+def duplicate_task(tasks, id):
+    # Duplicate task
+    new_task = {}
+    for task in tasks:
+        if task["id"] == id:
+            new_task = dict(task)
+            break
+    
+    # Assign task new id
+    new_id = generate_unique_id(tasks)
+    if new_task:
+        new_task["id"] = new_id
+    
+    # Add task to list
+    if new_task:
+        tasks.append(new_task)
+    
+    # Return list
+    return tasks
+
+def reminder(tasks, date):
+    # find tasks matching date, add ids to remind
+    remind = []
+    for task in tasks:
+        if task["due_date"] == date:
+            remind.append(task["id"])
+    
+    # return list of IDs of task due on date
+    return remind

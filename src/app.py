@@ -1,7 +1,8 @@
 import streamlit as st
 import pandas as pd
 from datetime import datetime
-from tasks import load_tasks, save_tasks, filter_tasks_by_priority, filter_tasks_by_category
+from tasks import load_tasks, save_tasks, filter_tasks_by_priority, filter_tasks_by_category, generate_unique_id, filter_tasks_by_completion
+import subprocess
 
 def main():
     st.title("To-Do Application")
@@ -23,7 +24,8 @@ def main():
         
         if submit_button and task_title:
             new_task = {
-                "id": len(tasks) + 1,
+                #"id": len(tasks) + 1, # Need to use generate_unique_id()
+                "id": generate_unique_id(tasks),
                 "title": task_title,
                 "description": task_description,
                 "priority": task_priority,
@@ -55,7 +57,8 @@ def main():
     if filter_priority != "All":
         filtered_tasks = filter_tasks_by_priority(filtered_tasks, filter_priority)
     if not show_completed:
-        filtered_tasks = [task for task in filtered_tasks if not task["completed"]]
+        #filtered_tasks = [task for task in filtered_tasks if not task["completed"]] # need to use filter_task_by_completion()
+        filtered_tasks = filter_tasks_by_completion(filtered_tasks, False)
     
     # Display tasks
     for task in filtered_tasks:
@@ -78,6 +81,81 @@ def main():
                 tasks = [t for t in tasks if t["id"] != task["id"]]
                 save_tasks(tasks)
                 st.rerun()
+
+    # Added Tests
+    st.header("Run Test")
+
+    col1, col2, col3 = st.columns(3)
+
+    with col1:
+        if st.button("Run Basic Unit Tests"):
+            st.write("Running tests...")
+
+            # Run pytest and capture output
+            result = subprocess.run(
+                ["pytest", "tests/test_basic.py"],
+                capture_output=True,
+                text=True
+            )
+
+            st.text_area("Test Output", result.stdout + "\n" + result.stderr, height=400)
+    
+    with col2:
+        if st.button("Run Advanced Unit Tests"):
+            st.write("Running tests...")
+
+            # Run pytest and capture output
+            result = subprocess.run(
+                ["pytest", "tests/test_advanced.py"],
+                capture_output=True,
+                text=True
+            )
+
+            st.text_area("Test Output", result.stdout + "\n" + result.stderr, height=400)
+    
+    with col3:
+        if st.button("Run Unit Tests With Coverage"):
+            st.write("Running tests...")
+
+            # Run pytest and capture output
+            result = subprocess.run(
+                ["pytest", "--cov=src", "tests/test_basic.py", "tests/test_advanced.py"],
+                capture_output=True,
+                text=True
+            )
+
+            st.text_area("Test Output", result.stdout + "\n" + result.stderr, height=400)
+    
+    st.divider()
+
+    col1, col2, col3 = st.columns(3)
+
+    with col1:
+        if st.button("Run TDD Tests"):
+            st.write("Running tests...")
+
+            # Run pytest and capture output
+            result = subprocess.run(
+                ["pytest", "tests/test_tdd.py"],
+                capture_output=True,
+                text=True
+            )
+
+            st.text_area("Test Output", result.stdout + "\n" + result.stderr, height=400)
+    
+    with col3:
+        if st.button("Run BDD Tests"):
+            st.write("Running tests...")
+
+            # Run behave and capture output
+            result = subprocess.run(
+                ["pytest", "tests/feature/"],
+                capture_output=True,
+                text=True
+            )
+
+            st.text_area("Test Output", result.stdout + "\n" + result.stderr, height=400)
+    
 
 if __name__ == "__main__":
     main()
